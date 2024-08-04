@@ -1,4 +1,4 @@
-[!画像](docs/screenshot.png)
+![画像](docs/screenshot.png)
 
 # django-channels-tutorial
 
