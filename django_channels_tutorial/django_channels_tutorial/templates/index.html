@@ -1,0 +1,171 @@
+<html lang="ja">
+<head>
+  <title>WebSocket Scratch</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .max-square {
+      width: min(100vw, 100vh);
+      height: min(100vw, 100vh);
+    }
+    .paint-dot {
+      position: absolute;
+      width: 2%;
+      height: 2%;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .name-label {
+      position: absolute;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<div class="flex items-center justify-center h-screen bg-gray-400">
+  <div class="max-square bg-white relative" id="playarea">
+  </div>
+</div>
+<div class="fixed top-0 left-0 p-2">
+  <div id="user"></div>
+</div>
+<script>
+  const playarea = document.getElementById('playarea');
+
+  // WebSocket クライアントを作成
+  // 本来は様々なエラーハンドリングが必要だが今回はチュートリアルのため省略している
+  const websocket = new WebSocket('ws://' + window.location.host + '/ws/');
+
+  // 自分のユーザー情報を作成
+  const userId = Math.random().toString(32).substring(2);
+  const userName = pickPresetName();
+  const userColor = pickRandomColor();
+
+  const userSpan = document.createElement('span');
+  userSpan.style.color = userColor;
+  userSpan.innerText = userName;
+  document.getElementById('user').appendChild(userSpan);
+
+  // 他のユーザーのラベルエレメントを入れるもの
+  const nameLabels = {};
+
+  /**
+   * WebSocket からメッセージを受信し、描画する
+   */
+  websocket.onmessage = (e) => {
+    console.log('onmessage', e.data)
+    const data = JSON.parse(e.data);
+    if (data.type === 'mousemove') {
+      if (data.click) {
+        const div = document.createElement('div');
+        div.className = 'paint-dot';
+        div.style.left = `${data.xRatio * 100 - 1}%`;
+        div.style.top = `${data.yRatio * 100 - 1}%`;
+        div.style.backgroundColor = data.userColor;
+        playarea.appendChild(div);
+      }
+
+      if (!nameLabels[data.userId]) {
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'name-label';
+        nameLabel.style.color = data.userColor;
+        nameLabel.innerText = data.userName;
+        nameLabels[data.userId] = nameLabel;
+        playarea.appendChild(nameLabel);
+      }
+      nameLabels[data.userId].style.left = `${data.xRatio*100}%`;
+      nameLabels[data.userId].style.top = `${data.yRatio*100 + 2}%`;
+    }
+  };
+
+  /**
+   * マウスを動かしたことを WebSocket に送信
+   */
+  playarea.addEventListener('mousemove', (e) => {
+    // playarea に対しての X, Y座標を取得する
+    const x = e.offsetX;
+    const y = e.offsetY;
+
+    // 場所を割合に変換
+    const xRatio = x / playarea.clientWidth;
+    const yRatio = y / playarea.clientHeight;
+
+    websocket.send(JSON.stringify({
+      type: 'mousemove',
+      xRatio: xRatio,
+      yRatio: yRatio,
+      userId: userId,
+      userName: userName,
+      userColor: userColor,
+      click: e.buttons === 1,
+    }));
+  });
+
+  /**
+   * 適当なユーザー名を選択
+   */
+  function pickPresetName() {
+    // 適当な名前
+    const presetNames = [
+      'Willow Grouse',
+      'Swan',
+      'Crane',
+      'Condor',
+      'Harpy Eagle',
+      'Hawk',
+      'Cassowary',
+      'Black-headed Gull',
+      'Osprey',
+      'White-tailed Eagle',
+      'Long-eared Bandicoot',
+      'Keel-billed Toucan',
+      'Manatee',
+      'Jackal',
+      'Giant Anteater',
+      'Ostrich',
+      'Owl',
+      'Japanese Macaque',
+      'Malayan Tapir',
+      'Polar Bear',
+      'Baboon',
+      'Peacock',
+      'Giant Anteater',
+      'African Elephant',
+      'American Bison',
+      'Reticulated Giraffe',
+      'Sandbar Shark',
+      'Cat',
+      'Pond Turtle',
+      'Gecko',
+      'Frilled Lizard',
+      'Humboldt Penguin',
+      'Galapagos Penguin',
+      'Hummingbird',
+      'Moose',
+      'Antelope',
+      'Tibetan Yak',
+      'Coyote',
+      'Camel',
+      'Golden Takin',
+      'Vanuatu Tree Lobster',
+      'Sperm Whale',
+      'Swordfish',
+      'Sawfish',
+      'Marlin',
+    ];
+    return presetNames[Math.floor(Math.random() * presetNames.length)];
+  }
+
+  /**
+   * 適当な色を選択
+   */
+  function pickRandomColor() {
+    const _h = Math.floor(Math.random() * 360);
+    const _s = Math.floor(Math.random() * 70) + 30;
+    const _l = Math.floor(Math.random() * 40) + 25;
+    return `hsl(${_h}, ${_s}%, ${_l}%)`;
+  }
+</script>
+</body>
+</html>

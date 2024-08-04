@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_channels_tutorial',
     'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -123,3 +124,19 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        # チュートリアルなので簡易的にローカルメモリーでやる。
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        # 実運用時は Redis を使う。
+        # redis を起動するには
+        # docker run --rm -p 6379:6379 redis:7
+        # pipenv install channels_redis
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #      'hosts': ['redis://127.0.0.1:6379/5'],
+        # },
+    },
+}
