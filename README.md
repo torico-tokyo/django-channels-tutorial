@@ -1,3 +1,5 @@
+[!画像](docs/screenshot.png)
+
 # django-channels-tutorial
 
 Django Channels の機能を使って、簡易的な複数人お絵かきアプリを作ります。
