@@ -32,7 +32,7 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-django = "~=5.0"
+django = "~=5.1"
 redis = "*"
 channels = "*"
 daphne = "*"
