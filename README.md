@@ -55,6 +55,7 @@ pipenv shell
 
 ```shell
 django-admin startproject django_channels_tutorial
+cd django_channels_tutorial
 ```
 
 
